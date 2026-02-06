@@ -1,0 +1,24 @@
+{
+  "name": "ytb-tui-player",
+  "version": "1.0.0",
+  "description": "Youtube Tui music player",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "rm -rf dist && nodemon src/index.ts",
+    "build": "npx tsc"
+  },
+  "keywords": [],
+  "author": "klm",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/blessed": "^0.1.27",
+    "nodemon": "^3.1.11"
+  },
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "chalk": "^5.6.2",
+    "node-mpv": "^1.5.0"
+  }
+}
