@@ -1,13 +1,17 @@
 import debug from '../debug/debug'
 import {
   getLastSearchQuery,
+  setLastPlayed,
   setLastSearchQuery,
+  setPlayingNow,
   setSearchResult,
 } from '../lib/database'
-import { searchVideos } from '../lib/youtube-search'
+import { searchVideos, Video } from '../lib/youtube-search'
 import { destroyPlayerStream } from '../lib/mpv-player'
 import { mainLayout, screen, searchLayout } from './screen'
 import { searchInput, searchResult } from './search'
+import { streamTrack } from '../lib/stream-engine'
+import { updateTrackCover, updateTrackInfo } from './info'
 
 const showSearchScreen = async () => {
   try {
@@ -80,10 +84,19 @@ const searchTracks = async (inQuery?: string) => {
   }
 }
 
+const setPlaying = async (track: Video) => {
+  setPlayingNow(track)
+  streamTrack(track.url)
+  updateTrackCover(track)
+  updateTrackInfo(track)
+  setLastPlayed(track)
+}
+
 export {
   showSearchScreen,
   showMainScreen,
   appExit,
   focusOnSearchInput,
   searchTracks,
+  setPlaying,
 }

@@ -7,7 +7,7 @@ const searchInput = blessed.textbox({
   left: 0,
   width: '100%',
   height: 3,
-  label: ' [ Search tracks by name (Enter to search) ] ',
+  label: ' [ Search tracks by author or name (Enter to search) ] ',
   border: { type: 'line' },
   style: {
     fg: 'white',

@@ -1,9 +1,13 @@
 import debug from '../debug/debug'
-import { getSearchResultItem, setPlayingNow } from '../lib/database'
+import {
+  getSearchResultItem,
+  setLastPlayed,
+  setPlayingNow,
+} from '../lib/database'
 import { streamTrack } from '../lib/stream-engine'
 import { updateTrackCover, updateTrackInfo } from './info'
-import { mainLayout, screen, searchLayout } from './screen'
-import { showMainScreen } from './scripts'
+import { screen } from './screen'
+import { setPlaying, showMainScreen } from './scripts'
 import { searchResult } from './search'
 
 searchResult.on('select', async (item, index) => {
@@ -12,11 +16,7 @@ searchResult.on('select', async (item, index) => {
 
     if (!track) return
 
-    setPlayingNow(track)
-    streamTrack(track.url)
-    updateTrackCover(track)
-    updateTrackInfo(track)
-
+    setPlaying(track)
     showMainScreen()
 
     screen.render()

@@ -5,6 +5,7 @@ import './modules/playlist'
 import './modules/search'
 import './modules/info'
 import './modules/events'
+import './modules/last-played'
 
 screen.render()
 createPlayer()

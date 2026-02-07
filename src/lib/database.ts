@@ -2,13 +2,13 @@ import { debug } from 'console'
 import { Low } from 'lowdb'
 import { JSONFile } from 'lowdb/node'
 import path from 'path'
-import { VideoSearchResult } from 'yt-search'
 import { Video } from './youtube-search'
 
 interface Data {
   searchResult: Array<Video>
   playingnow: Video | null
   lastSearchQuery: string
+  lastPlayed: Video | null
 }
 
 const file = path.join(process.cwd(), 'db.json')
@@ -17,9 +17,29 @@ const defaultData: Data = {
   searchResult: [],
   playingnow: null,
   lastSearchQuery: '',
+  lastPlayed: null,
 }
 
 const db = new Low<Data>(adapter, defaultData)
+
+const setLastPlayed = async (video: Video) => {
+  try {
+    await db.read()
+    db.data.lastPlayed = video
+    await db.write()
+  } catch (error) {
+    debug((error as Error).message)
+  }
+}
+
+const getLastPlayed = async () => {
+  try {
+    await db.read()
+    return db.data.lastPlayed
+  } catch (error) {
+    debug((error as Error).message)
+  }
+}
 
 const setLastSearchQuery = async (query: string) => {
   try {
@@ -113,4 +133,6 @@ export {
   getSearchResultCount,
   setLastSearchQuery,
   getLastSearchQuery,
+  setLastPlayed,
+  getLastPlayed,
 }

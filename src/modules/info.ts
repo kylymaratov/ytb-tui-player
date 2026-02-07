@@ -74,6 +74,7 @@ const updateTrackCover = async (track: Video) => {
 
     coverBox.setContent(imageStr)
     coverBox.show()
+    coverBox.render()
   } catch (error) {
     debug((error as Error).message)
   }
