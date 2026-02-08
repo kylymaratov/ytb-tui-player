@@ -7,14 +7,14 @@ export class IpcClient {
   private ipcClient: net.Socket | null = null
   readonly ipcPath = getIpcPath()
 
-  async destroy() {
+  async destroyClient() {
     if (this.ipcClient) {
       this.ipcClient.end()
       this.ipcClient = null
     }
   }
 
-  async create() {
+  async createClient() {
     try {
       await sleep(5000)
       return await new Promise<net.Socket>((resolve, reject) => {

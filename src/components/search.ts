@@ -1,7 +1,7 @@
 import blessed from 'blessed'
 import { searchLayout, screen } from './screen'
 
-const searchInput = blessed.textbox({
+const searchBox = blessed.textbox({
   parent: searchLayout,
   top: 0,
   left: 0,
@@ -17,7 +17,7 @@ const searchInput = blessed.textbox({
   inputOnFocus: true,
 })
 
-const searchResult = blessed.list({
+const searchResultBox = blessed.list({
   parent: searchLayout,
   top: 3,
   left: 0,
@@ -30,4 +30,4 @@ const searchResult = blessed.list({
   keys: true,
 })
 
-export { searchInput, searchResult }
+export { searchBox, searchResultBox }

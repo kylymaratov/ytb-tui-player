@@ -1,11 +1,5 @@
-import { screen } from './modules/screen'
-import { createPlayer } from './lib/mpv-player'
-import './modules/commands'
-import './modules/playlist'
-import './modules/search'
-import './modules/info'
-import './modules/events'
-import './modules/last-played'
+import { Handler } from './lib/handler'
 
-screen.render()
-createPlayer()
+const hanlder = new Handler()
+
+hanlder.init()

@@ -1,7 +1,7 @@
 import blessed from 'blessed'
 import { mainLayout } from './screen'
 
-const playlist = blessed.list({
+const playlistBox = blessed.list({
   parent: mainLayout,
   width: '30%',
   height: '100%',
@@ -15,4 +15,4 @@ const playlist = blessed.list({
   items: ['No tracks in playlist'],
 })
 
-export { playlist }
+export { playlistBox }

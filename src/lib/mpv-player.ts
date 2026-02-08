@@ -7,6 +7,10 @@ export class MpvPlayer {
   private readonly ipcClient = new IpcClient()
   private mpvProcess: ChildProcess | null = null
 
+  constructor() {
+    this.createProcess()
+  }
+
   private readonly mpvArgs = [
     '--no-video',
     '--no-terminal',
@@ -16,18 +20,18 @@ export class MpvPlayer {
     '-',
   ]
 
-  async create() {
+  async createProcess() {
     try {
       return await new Promise((resovle, reject) => {
         this.mpvProcess = spawn('mpv', this.mpvArgs, {
           stdio: ['pipe', 'ignore', 'ignore'],
         })
 
-        this.mpvProcess.on('close', () => this.destroy())
-        this.mpvProcess.on('exit', () => this.destroy())
+        this.mpvProcess.on('close', () => this.createProcess())
+        this.mpvProcess.on('exit', () => this.destroyProcess())
         this.mpvProcess.on('error', (error) => reject(error))
 
-        this.ipcClient.create().then(() => {
+        this.ipcClient.createClient().then(() => {
           resovle('Success')
         })
       })
@@ -36,15 +40,15 @@ export class MpvPlayer {
     }
   }
 
-  async destroy() {
+  async destroyProcess() {
     if (this.mpvProcess) {
       this.mpvProcess.kill()
       this.mpvProcess = null
     }
-    await this.ipcClient.destroy()
+    await this.ipcClient.destroyClient()
   }
 
-  async write(inputStream: Stream.Writable) {
+  async writeStream(inputStream: Stream.Readable) {
     try {
       if (!this.mpvProcess?.stdin) return
 
