@@ -1,46 +1,42 @@
-import { spawn, ChildProcess } from 'child_process'
-import debug from '../debug/debug'
-import Stream from 'stream'
-import os from 'os'
-import path from 'path'
 import net from 'net'
-import fs from 'fs/promises'
+import { getIpcPath } from '../utils/ipc.util'
+import { debug } from './debug'
+import { sleep } from '../utils/index.util'
 
-let ipcClient: net.Socket | null = null
+export class IpcClient {
+  private ipcClient: net.Socket | null = null
+  readonly ipcPath = getIpcPath()
 
-const ipcPath =
-  os.platform() === 'win32'
-    ? '\\\\.\\pipe\\mpvpipe'
-    : path.join(os.tmpdir(), 'mpvpipe')
-
-const destroyIpcClient = () => {
-  if (ipcClient) {
-    ipcClient.end()
-    ipcClient = null
+  async destroy() {
+    if (this.ipcClient) {
+      this.ipcClient.end()
+      this.ipcClient = null
+    }
   }
-}
 
-const createIpcClient = async (retries = 5, delay = 100) => {
-  try {
-    new Promise<net.Socket>((resolve, reject) => {
-      const client = net.createConnection(ipcPath)
-      client.on('connect', () => {
-        ipcClient = client
-        resolve(client)
+  async create() {
+    try {
+      await sleep(5000)
+      return await new Promise<net.Socket>((resolve, reject) => {
+        const client = net.createConnection(this.ipcPath)
+        client.on('connect', () => {
+          this.ipcClient = client
+          resolve(client)
+        })
+        client.on('error', (err) => reject(err))
       })
-      client.on('error', (err) => reject(err))
-    })
-  } catch (error) {
-    debug((error as Error).message)
+    } catch (error) {
+      debug(error as Error)
+    }
+  }
+
+  async sendCommand(cmd: any) {
+    if (!this.ipcClient) return
+
+    try {
+      this.ipcClient.write(JSON.stringify(cmd) + '\n')
+    } catch (error) {
+      debug(error as Error)
+    }
   }
 }
-
-const sendCommand = (cmd: any) => {
-  try {
-    ipcClient?.write(JSON.stringify(cmd) + '\n')
-  } catch (err) {
-    debug('sendCommand error: ' + (err as Error).message)
-  }
-}
-
-export { createIpcClient, destroyIpcClient, sendCommand, ipcPath }

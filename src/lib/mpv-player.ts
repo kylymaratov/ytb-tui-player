@@ -1,57 +1,62 @@
 import { spawn, ChildProcess } from 'child_process'
-import debug from '../debug/debug'
 import Stream from 'stream'
-import {
-  createIpcClient,
-  destroyIpcClient,
-  ipcPath,
-  sendCommand,
-} from './ipc-client'
+import { IpcClient } from './ipc-client'
+import { debug } from './debug'
 
-let currentMpvProcess: ChildProcess | null = null
+export class MpvPlayer {
+  private readonly ipcClient = new IpcClient()
+  private mpvProcess: ChildProcess | null = null
 
-const destroyPlayerStream = () => {
-  if (currentMpvProcess) {
-    currentMpvProcess.kill()
-    currentMpvProcess = null
+  private readonly mpvArgs = [
+    '--no-video',
+    '--no-terminal',
+    '--quiet',
+    '--really-quiet',
+    `--input-ipc-server=${this.ipcClient.ipcPath}`,
+    '-',
+  ]
+
+  async create() {
+    try {
+      return await new Promise((resovle, reject) => {
+        this.mpvProcess = spawn('mpv', this.mpvArgs, {
+          stdio: ['pipe', 'ignore', 'ignore'],
+        })
+
+        this.mpvProcess.on('close', () => this.destroy())
+        this.mpvProcess.on('exit', () => this.destroy())
+        this.mpvProcess.on('error', (error) => reject(error))
+
+        this.ipcClient.create().then(() => {
+          resovle('Success')
+        })
+      })
+    } catch (error) {
+      debug(error as Error)
+    }
   }
-  destroyIpcClient()
-}
 
-const createPlayer = () => {
-  try {
-    currentMpvProcess = spawn(
-      'mpv',
-      [
-        '--no-video',
-        '--no-terminal',
-        '--quiet',
-        '--really-quiet',
-        `--input-ipc-server=${ipcPath}`,
-        '-',
-      ],
-      { stdio: ['pipe', 'ignore', 'ignore'] },
-    )
+  async destroy() {
+    if (this.mpvProcess) {
+      this.mpvProcess.kill()
+      this.mpvProcess = null
+    }
+    await this.ipcClient.destroy()
+  }
 
-    currentMpvProcess.on('close', () => destroyPlayerStream())
-    currentMpvProcess.on('exit', () => destroyPlayerStream())
-    currentMpvProcess.on('error', (err) => debug(err.message))
-    setTimeout(() => createIpcClient(), 5000)
-  } catch (error) {
-    debug((error as Error).message)
+  async write(inputStream: Stream.Writable) {
+    try {
+      if (!this.mpvProcess?.stdin) return
+
+      this.ipcClient.sendCommand({ command: ['loadfile', '-', 'replace'] })
+
+      inputStream.pipe(this.mpvProcess.stdin, { end: false })
+    } catch (error) {
+      debug
+    }
+  }
+
+  togglePause = () => {
+    this.ipcClient.sendCommand({ command: ['cycle', 'pause'] })
   }
 }
-
-const writeStream = (inputStream: Stream.Readable) => {
-  if (!currentMpvProcess?.stdin) return
-
-  sendCommand({ command: ['loadfile', '-', 'replace'] })
-
-  inputStream.pipe(currentMpvProcess.stdin, { end: false })
-}
-
-const togglePause = () => {
-  sendCommand({ command: ['cycle', 'pause'] })
-}
-
-export { destroyPlayerStream, togglePause, writeStream, createPlayer }

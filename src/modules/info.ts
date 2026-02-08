@@ -4,7 +4,7 @@ import sharp from 'sharp'
 import terminalImage from 'terminal-image'
 import fetch from 'node-fetch'
 import { Video } from '../lib/youtube-search'
-import debug from '../debug/debug'
+import debug from '../lib/debug'
 
 const infoBox = blessed.box({
   parent: mainLayout,

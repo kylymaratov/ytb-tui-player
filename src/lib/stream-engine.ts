@@ -1,10 +1,29 @@
 import { spawn } from 'child_process'
-import { writeStream } from './mpv-player'
+import { MpvPlayer } from './mpv-player'
+import { debug } from './debug'
 
-const streamTrack = (url: string) => {
-  const ytdlp = spawn('yt-dlp', ['-o', '-', '-f', 'bestaudio', '--quiet', url])
+export class StreamEngine {
+  private readonly mpvPlayer = new MpvPlayer()
 
-  writeStream(ytdlp.stdout)
+  private getStream(url: string) {
+    const ytdlp = spawn('yt-dlp', [
+      '-o',
+      '-',
+      '-f',
+      'bestaudio',
+      '--quiet',
+      url,
+    ])
+
+    return ytdlp.stdin
+  }
+
+  start(url: string) {
+    try {
+      const stream = this.getStream(url)
+      this.mpvPlayer.write(stream)
+    } catch (error) {
+      debug(error as Error)
+    }
+  }
 }
-
-export { streamTrack }
