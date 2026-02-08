@@ -6,10 +6,16 @@ export class Handler extends Logic {
     super()
   }
 
-  init() {
-    this.registerEvents()
-    this.registerKeyBinds()
-    this.screenRender()
+  async init() {
+    try {
+      this.registerEvents()
+      this.registerKeyBinds()
+      this.screenRender()
+      this.createMpvProcess()
+    } catch (error) {
+      debug(error as Error)
+      console.error((error as Error).message)
+    }
   }
 
   registerEvents() {
@@ -29,7 +35,7 @@ export class Handler extends Logic {
     })
   }
 
-  async registerKeyBinds() {
+  registerKeyBinds() {
     const screen = this.getScreen()
 
     screen.on('keypress', async (_ch, key) => {
@@ -44,13 +50,19 @@ export class Handler extends Logic {
           return this.switchToMainScreen()
         }
         if (key.name === 'space') {
-          return this.togglePause()
+          return await this.togglePause()
         }
       } catch (error) {
         debug(error as Error)
       }
     })
 
-    screen.key(['q', 'C-c'], () => this.exit())
+    screen.key(['q', 'C-c'], async () => {
+      try {
+        await this.exit()
+      } catch (error) {
+        debug(error as Error)
+      }
+    })
   }
 }

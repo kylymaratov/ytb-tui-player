@@ -1,43 +1,35 @@
 import { spawn, ChildProcess } from 'child_process'
 import Stream from 'stream'
 import { IpcClient } from './ipc-client'
-import { debug } from './debug'
+import { getIpcPath } from '../utils/ipc.util'
 
 export class MpvPlayer {
   private readonly ipcClient = new IpcClient()
   private mpvProcess: ChildProcess | null = null
-
-  constructor() {
-    this.createProcess()
-  }
 
   private readonly mpvArgs = [
     '--no-video',
     '--no-terminal',
     '--quiet',
     '--really-quiet',
-    `--input-ipc-server=${this.ipcClient.ipcPath}`,
+    `--input-ipc-server=${getIpcPath()}`,
     '-',
   ]
 
   async createProcess() {
-    try {
-      return await new Promise((resovle, reject) => {
-        this.mpvProcess = spawn('mpv', this.mpvArgs, {
-          stdio: ['pipe', 'ignore', 'ignore'],
-        })
-
-        this.mpvProcess.on('close', () => this.createProcess())
-        this.mpvProcess.on('exit', () => this.destroyProcess())
-        this.mpvProcess.on('error', (error) => reject(error))
-
-        this.ipcClient.createClient().then(() => {
-          resovle('Success')
-        })
+    return await new Promise((resovle, reject) => {
+      this.mpvProcess = spawn('mpv', this.mpvArgs, {
+        stdio: ['pipe', 'ignore', 'ignore'],
       })
-    } catch (error) {
-      debug(error as Error)
-    }
+
+      this.mpvProcess.on('close', () => this.createProcess())
+      this.mpvProcess.on('exit', () => this.destroyProcess())
+      this.mpvProcess.on('error', (error) => reject(error))
+
+      this.ipcClient.createClient().then(() => {
+        resovle('Success')
+      })
+    })
   }
 
   async destroyProcess() {
@@ -49,18 +41,22 @@ export class MpvPlayer {
   }
 
   async writeStream(inputStream: Stream.Readable) {
-    try {
-      if (!this.mpvProcess?.stdin) return
+    if (!this.mpvProcess?.stdin) return
 
-      this.ipcClient.sendCommand({ command: ['loadfile', '-', 'replace'] })
+    await this.ipcClient.sendCommand({ command: ['loadfile', '-', 'replace'] })
 
-      inputStream.pipe(this.mpvProcess.stdin, { end: false })
-    } catch (error) {
-      debug
-    }
+    inputStream.pipe(this.mpvProcess.stdin, { end: false })
   }
 
-  togglePause = () => {
-    this.ipcClient.sendCommand({ command: ['cycle', 'pause'] })
+  async isPaused(): Promise<boolean> {
+    const response = await this.ipcClient.sendCommand<any>({
+      command: ['get_property', 'pause'],
+      request_id: Math.floor(Math.random() * 10000),
+    })
+    return response.data
+  }
+
+  async togglePause() {
+    await this.ipcClient.sendCommand({ command: ['cycle', 'pause'] })
   }
 }

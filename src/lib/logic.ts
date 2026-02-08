@@ -6,6 +6,7 @@ import { Database } from './database'
 import { StreamEngine } from './stream-engine'
 import { Youtube } from './youtube-search'
 import { MpvPlayer } from './mpv-player'
+import { debug } from './debug'
 
 export class Logic extends Components {
   private readonly youtube = new Youtube()
@@ -13,17 +14,23 @@ export class Logic extends Components {
   private readonly streamEninge = new StreamEngine()
   private readonly mpvPlayer = new MpvPlayer()
 
+  private eqInterval: NodeJS.Timeout | null = null
+
   constructor() {
     super()
   }
 
+  async createMpvProcess() {
+    await this.mpvPlayer.createProcess()
+  }
+
   updateTrackInfo(track: TVideo) {
     const content = `
-{bold}Title:{/bold} ${track.title}
+    {bold}Title:{/bold} ${track.title}
 
-{bold}Author:{/bold} ${track.author}
+    {bold}Author:{/bold} ${track.author}
 
-{bold}Duration:{/bold} ${track.duration}
+    {bold}Duration:{/bold} ${track.duration}
   `
     this.trackInfoBox.setContent(content)
     this.trackInfoBox.show()
@@ -55,6 +62,7 @@ export class Logic extends Components {
   async switchToSearchScreen() {
     this.mainLayout.hide()
     this.searchLayout.show()
+    this.equalizerBar.hide()
 
     const query = await this.db.read('lastSearchQuery')
 
@@ -67,9 +75,10 @@ export class Logic extends Components {
     await this.searchTracksByQuery(query)
   }
 
-  async switchToMainScreen() {
+  switchToMainScreen() {
     this.searchLayout.hide()
     this.mainLayout.show()
+    this.equalizerBar.show()
     this.screenRender()
   }
 
@@ -108,7 +117,7 @@ export class Logic extends Components {
     if (!track) return
 
     const trackStream = this.streamEninge.getTrackStream(track.url)
-    this.mpvPlayer.writeStream(trackStream)
+    await this.mpvPlayer.writeStream(trackStream)
 
     this.updateTrackCover(track)
     this.updateTrackInfo(track)
@@ -116,26 +125,59 @@ export class Logic extends Components {
     this.db.write('playingnow', track)
     this.db.write('lastPlayed', track)
 
+    this.startEQUpdate()
     this.switchToMainScreen()
     this.screenRender()
   }
 
   async togglePause() {
-    this.mpvPlayer.togglePause()
+    await this.mpvPlayer.togglePause()
+
+    const paused = await this.mpvPlayer.isPaused()
+
+    if (paused) {
+      this.stopEQUpdate()
+      this.clearEQBars()
+    } else {
+      this.startEQUpdate()
+    }
+  }
+
+  clearEQBars() {
+    this.equalizerBar.setData({
+      titles: ['60', '170', '310', '600', '1k', '3k', '6k', '12k'],
+      data: new Array(8).fill(0),
+    })
+    this.screenRender()
   }
 
   updateEQ() {
     const simulatedData = Array.from(
-      { length: 8 },
+      { length: 10 },
       () => Math.floor(Math.random() * 10) + 1,
     )
 
     this.equalizerBar.setData({
-      titles: ['60', '170', '310', '600', '1k', '3k', '6k', '12k'],
+      titles: simulatedData.map((_, i) => '-'),
       data: simulatedData,
     })
 
     this.screenRender()
+  }
+
+  startEQUpdate() {
+    this.stopEQUpdate()
+
+    this.eqInterval = setInterval(() => {
+      this.updateEQ()
+    }, 150)
+  }
+
+  stopEQUpdate() {
+    if (this.eqInterval) {
+      clearInterval(this.eqInterval)
+      this.eqInterval = null
+    }
   }
 
   async exit() {

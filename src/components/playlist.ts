@@ -11,7 +11,18 @@ const playlistBox = blessed.list({
   border: { type: 'line' },
   keys: true,
   mouse: true,
-  style: { selected: { bg: 'green', fg: 'black' } },
+  style: {
+    fg: 'white',
+    bg: 'black',
+    border: {
+      fg: 'white',
+    },
+    selected: {
+      bg: 'white',
+      fg: 'black',
+      bold: true,
+    },
+  },
   items: ['No tracks in playlist'],
 })
 

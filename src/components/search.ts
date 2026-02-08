@@ -25,7 +25,18 @@ const searchResultBox = blessed.list({
   height: '100%-3',
   label: ' Search Result ',
   border: { type: 'line' },
-  style: { selected: { bg: 'green', fg: 'black' } },
+  style: {
+    fg: 'white',
+    bg: 'black',
+    border: {
+      fg: 'white',
+    },
+    selected: {
+      bg: 'white',
+      fg: 'black',
+      bold: true,
+    },
+  },
   items: ['No results yet'],
   keys: true,
 })
