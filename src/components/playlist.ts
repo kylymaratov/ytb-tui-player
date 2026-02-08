@@ -4,7 +4,7 @@ import { mainLayout } from './screen'
 const playlistBox = blessed.list({
   parent: mainLayout,
   width: '30%',
-  height: '100%',
+  height: '99%',
   top: 0,
   left: 0,
   label: ' Playlist ',
@@ -15,7 +15,7 @@ const playlistBox = blessed.list({
     fg: 'white',
     bg: 'black',
     border: {
-      fg: 'white',
+      fg: 'yellow',
     },
     selected: {
       bg: 'white',
@@ -23,7 +23,6 @@ const playlistBox = blessed.list({
       bold: true,
     },
   },
-  items: ['No tracks in playlist'],
 })
 
 export { playlistBox }

@@ -5,5 +5,5 @@ export interface TVideo {
   url: string
   thumbnail: string
   duration: string
-  durationMs: number
+  durationMs?: number
 }

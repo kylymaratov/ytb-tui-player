@@ -13,8 +13,7 @@ export class Logic extends Components {
   private readonly db = new Database()
   private readonly streamEninge = new StreamEngine()
   private readonly mpvPlayer = new MpvPlayer()
-
-  private eqInterval: NodeJS.Timeout | null = null
+  private progressInterval: NodeJS.Timeout | null = null
 
   constructor() {
     super()
@@ -24,16 +23,33 @@ export class Logic extends Components {
     await this.mpvPlayer.createProcess()
   }
 
-  updateTrackInfo(track: TVideo) {
-    const content = `
-    {bold}Title:{/bold} ${track.title}
+  updateTrackInfo(track: TVideo, currentSeconds: number) {
+    const animationFrames = ['/', '-', '\\', '|']
+    const frame = animationFrames[Math.floor(currentSeconds % 4)]
 
-    {bold}Author:{/bold} ${track.author}
+    const totalSeconds = track.durationMs as number
 
-    {bold}Duration:{/bold} ${track.duration}
-  `
-    this.trackInfoBox.setContent(content)
-    this.trackInfoBox.show()
+    const barLength = 20
+    const progressRatio = totalSeconds > 0 ? currentSeconds / totalSeconds : 0
+    const filledLength = Math.round(barLength * progressRatio)
+
+    const progressBar =
+      '{green-fg}' +
+      '█'.repeat(filledLength) +
+      '{/green-fg}' +
+      '{gray-fg}' +
+      '░'.repeat(barLength - filledLength) +
+      '{/gray-fg}'
+
+    this.trackInfoBox.setContent(
+      `{bold}Title:{/bold} ${track.title}\n\n` +
+        `{bold}Author:{/bold} ${track.author}\n\n` +
+        `{bold}Progress:{/bold} ${this.formatTime(currentSeconds)} / ${this.formatTime(totalSeconds)}\n` +
+        `\n\n[${progressBar}] ${frame}`,
+    )
+    if (this.trackInfoBox.hidden) this.trackInfoBox.show()
+
+    this.screenRender()
   }
 
   async updateTrackCover(track: TVideo) {
@@ -62,7 +78,6 @@ export class Logic extends Components {
   async switchToSearchScreen() {
     this.mainLayout.hide()
     this.searchLayout.show()
-    this.equalizerBar.hide()
 
     const query = await this.db.read('lastSearchQuery')
 
@@ -78,7 +93,6 @@ export class Logic extends Components {
   switchToMainScreen() {
     this.searchLayout.hide()
     this.mainLayout.show()
-    this.equalizerBar.show()
     this.screenRender()
   }
 
@@ -120,64 +134,48 @@ export class Logic extends Components {
     await this.mpvPlayer.writeStream(trackStream)
 
     this.updateTrackCover(track)
-    this.updateTrackInfo(track)
+
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval)
+    }
+
+    this.progressInterval = setInterval(() => {
+      this.startProgressTracking(track)
+    }, 1000)
 
     this.db.write('playingnow', track)
     this.db.write('lastPlayed', track)
 
-    this.startEQUpdate()
     this.switchToMainScreen()
     this.screenRender()
   }
 
+  formatTime(seconds: number): string {
+    if (isNaN(seconds) || seconds < 0) return '00:00'
+
+    const minutes = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+
+    const formattedMinutes = String(minutes).padStart(2, '0')
+    const formattedSeconds = String(secs).padStart(2, '0')
+
+    return `${formattedMinutes}:${formattedSeconds}`
+  }
+
+  async startProgressTracking(track: TVideo) {
+    try {
+      const currentSeconds = await this.mpvPlayer.getTimePos()
+
+      if (!currentSeconds) return
+
+      this.updateTrackInfo(track, currentSeconds)
+    } catch (error) {
+      debug(error as Error)
+    }
+  }
+
   async togglePause() {
     await this.mpvPlayer.togglePause()
-
-    const paused = await this.mpvPlayer.isPaused()
-
-    if (paused) {
-      this.stopEQUpdate()
-      this.clearEQBars()
-    } else {
-      this.startEQUpdate()
-    }
-  }
-
-  clearEQBars() {
-    this.equalizerBar.setData({
-      titles: ['60', '170', '310', '600', '1k', '3k', '6k', '12k'],
-      data: new Array(8).fill(0),
-    })
-    this.screenRender()
-  }
-
-  updateEQ() {
-    const simulatedData = Array.from(
-      { length: 10 },
-      () => Math.floor(Math.random() * 10) + 1,
-    )
-
-    this.equalizerBar.setData({
-      titles: simulatedData.map((_, i) => '-'),
-      data: simulatedData,
-    })
-
-    this.screenRender()
-  }
-
-  startEQUpdate() {
-    this.stopEQUpdate()
-
-    this.eqInterval = setInterval(() => {
-      this.updateEQ()
-    }, 150)
-  }
-
-  stopEQUpdate() {
-    if (this.eqInterval) {
-      clearInterval(this.eqInterval)
-      this.eqInterval = null
-    }
   }
 
   async exit() {

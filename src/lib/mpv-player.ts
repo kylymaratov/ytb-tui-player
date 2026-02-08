@@ -49,7 +49,7 @@ export class MpvPlayer {
   }
 
   async isPaused(): Promise<boolean> {
-    const response = await this.ipcClient.sendCommand<any>({
+    const response = await this.ipcClient.sendCommand<{ data: boolean }>({
       command: ['get_property', 'pause'],
       request_id: Math.floor(Math.random() * 10000),
     })
@@ -58,5 +58,22 @@ export class MpvPlayer {
 
   async togglePause() {
     await this.ipcClient.sendCommand({ command: ['cycle', 'pause'] })
+  }
+
+  async getTimePos() {
+    const requestId = Math.floor(Math.random() * 10000)
+
+    const cmd = {
+      request_id: requestId,
+      command: ['get_property', 'time-pos'],
+    }
+
+    const response = await this.ipcClient.sendCommand<{ data: number }>(cmd)
+
+    if (response && typeof response.data === 'number') {
+      const currentSeconds = response.data
+
+      return currentSeconds
+    }
   }
 }

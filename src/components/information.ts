@@ -15,28 +15,44 @@ const trackInfoLayout = blessed.box({
   },
 })
 
+const trackInfoBox = blessed.box({
+  parent: trackInfoLayout,
+  top: 'center',
+  left: '2%',
+  width: '55%',
+  height: '80%',
+  align: 'left',
+  valign: 'middle',
+  tags: true,
+})
+
 const trackCoverBox = blessed.box({
   parent: trackInfoLayout,
-  top: 0,
-  left: 'center',
-  width: '50%',
-  height: '50%',
+  top: 'center',
+  left: '60%',
+  width: '35%',
+  height: '70%',
   align: 'center',
   valign: 'middle',
   tags: true,
   hidden: true,
 })
 
-const trackInfoBox = blessed.box({
-  parent: trackInfoLayout,
-  top: '55%',
-  left: 'center',
-  width: '80%',
-  height: '30%',
+const helpBox = blessed.box({
+  parent: mainLayout,
+  top: '80%',
+  left: '30%',
+  width: '70%',
+  height: '20%',
   align: 'center',
   valign: 'middle',
   tags: true,
-  content: '{center}Select track and press Enter{/center}',
+  border: { type: 'line', fg: 8 },
+  content:
+    '{bold}Управление:{/bold}\n' +
+    '↑/↓: Навигация | Enter: Воспроизвести\n' +
+    'Space: Пауза | q: Выход',
+  label: 'Instrucation',
 })
 
-export { trackCoverBox, trackInfoBox, trackInfoLayout }
+export { trackCoverBox, trackInfoBox, trackInfoLayout, helpBox }

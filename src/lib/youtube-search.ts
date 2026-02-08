@@ -1,7 +1,11 @@
 import yts, { VideoSearchResult } from 'yt-search'
-import { exec } from 'child_process'
+import ytdl from 'ytdl-core'
 import { debug } from './debug'
 import { TVideo } from '../types/entities.types'
+
+import { Innertube, UniversalCache } from 'youtubei.js'
+
+process.env.YOUTUBEJS_NO_LOGS = 'true'
 
 export class Youtube {
   private isMusicTrack(video: VideoSearchResult): boolean {
@@ -33,35 +37,12 @@ export class Youtube {
     }
   }
 
-  async related(videoId: string) {
-    return new Promise((resolve, reject) => {
-      exec(
-        `yt-dlp --dump-json https://www.youtube.com/watch?v=${videoId}`,
-        (err, stdout, stderr) => {
-          if (err) {
-            return reject(
-              `Error fetching video metadata: ${stderr || err.message}`,
-            )
-          }
-
-          try {
-            const metadata = JSON.parse(stdout)
-
-            const relatedVideos: TVideo[] =
-              metadata.related_videos?.map((video: any) => ({
-                videoId: video.id,
-                title: video.title,
-                author: video.uploader,
-                thumbnail: video.thumbnail,
-                diration: video.duration,
-              })) || []
-
-            resolve(relatedVideos)
-          } catch (parseError) {
-            reject('Error parsing yt-dlp JSON output')
-          }
-        },
-      )
-    })
+  async getRelated(url: string): Promise<TVideo[]> {
+    try {
+      return []
+    } catch (error) {
+      debug(error as Error)
+      return []
+    }
   }
 }

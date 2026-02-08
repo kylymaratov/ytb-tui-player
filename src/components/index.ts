@@ -1,4 +1,3 @@
-import { equalizerBar } from './equalizer'
 import { trackCoverBox, trackInfoBox, trackInfoLayout } from './information'
 import { playlistBox } from './playlist'
 import { mainLayout, screen, searchLayout } from './screen'
@@ -13,7 +12,6 @@ export class Components {
   readonly trackInfoBox = trackInfoBox
   readonly trackCoverBox = trackCoverBox
   readonly tackInfoLayout = trackInfoLayout
-  readonly equalizerBar = equalizerBar
   private readonly screen = screen
 
   screenRender() {
