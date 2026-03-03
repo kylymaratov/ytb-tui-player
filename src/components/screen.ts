@@ -11,7 +11,7 @@ const mainLayout = blessed.box({
   left: 0,
   width: '100%',
   height: '100%',
-  hidden: false,
+  hidden: true,
 })
 
 const searchLayout = blessed.box({

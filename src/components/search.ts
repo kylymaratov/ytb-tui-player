@@ -11,7 +11,7 @@ const searchBox = blessed.textbox({
   border: { type: 'line' },
   style: {
     fg: 'white',
-    border: { fg: 'cyan' },
+    border: { type: 'line', fg: 8 },
     focus: { border: { fg: 'yellow' } },
   },
   inputOnFocus: true,
@@ -19,15 +19,12 @@ const searchBox = blessed.textbox({
 
 const searchResultBox = blessed.list({
   parent: searchLayout,
-  top: 3,
+  top: 4,
   left: 0,
   width: '100%',
-  height: '100%-3',
-  border: { type: 'line' },
+  height: '100%-4',
+  border: { type: 'line', fg: 8 },
   style: {
-    fg: 'white',
-    bg: 'black',
-
     selected: {
       bg: 'white',
       fg: 'black',

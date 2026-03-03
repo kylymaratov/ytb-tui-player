@@ -1,4 +1,5 @@
 import { trackCoverBox, trackInfoBox, trackInfoLayout } from './information'
+import { loadingBox } from './loading'
 import { playlistBox } from './playlist'
 import { mainLayout, screen, searchLayout } from './screen'
 import { searchBox, searchResultBox } from './search'
@@ -12,6 +13,7 @@ export class Components {
   readonly trackInfoBox = trackInfoBox
   readonly trackCoverBox = trackCoverBox
   readonly tackInfoLayout = trackInfoLayout
+  readonly loadingBox = loadingBox
   private readonly screen = screen
 
   screenRender() {

@@ -1,20 +1,25 @@
-import { debug } from './debug'
-import { Logic } from './logic'
+import { debug } from './lib/debug'
+import { MainLogic } from './logic/main-logic'
 
-export class Handler extends Logic {
+export class App extends MainLogic {
   constructor() {
     super()
   }
 
   async init() {
     try {
-      this.registerEvents()
-      this.registerKeyBinds()
-      this.screenRender()
-      this.createMpvProcess()
+      this.createMpvProcess().then(() => {
+        this.registerEvents()
+        this.registerKeyBinds()
+        this.screenRender()
+
+        this.mainLayout.show()
+        this.loadingBox.hide()
+        this.screenRender()
+      })
     } catch (error) {
       debug(error as Error)
-      console.error((error as Error).message)
+      throw error
     }
   }
 

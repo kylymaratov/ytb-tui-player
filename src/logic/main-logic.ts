@@ -1,14 +1,15 @@
 import terminalImage from 'terminal-image'
-import { Components } from '../components'
+import { Components } from '../components/main'
 import { trackInfoLayout } from '../components/information'
 import { TVideo } from '../types/entities.types'
-import { Database } from './database'
-import { StreamEngine } from './stream-engine'
-import { Youtube } from './youtube-search'
-import { MpvPlayer } from './mpv-player'
-import { debug } from './debug'
+import { Database } from '../lib/database'
+import { StreamEngine } from '../lib/stream-engine'
+import { Youtube } from '../lib/youtube-search'
+import { MpvPlayer } from '../lib/mpv-player'
+import { debug } from '../lib/debug'
+import { formatTime } from '../utils/index.util'
 
-export class Logic extends Components {
+export class MainLogic extends Components {
   private readonly youtube = new Youtube()
   private readonly db = new Database()
   private readonly streamEninge = new StreamEngine()
@@ -44,7 +45,9 @@ export class Logic extends Components {
     this.trackInfoBox.setContent(
       `{bold}Title:{/bold} ${track.title}\n\n` +
         `{bold}Author:{/bold} ${track.author}\n\n` +
-        `{bold}Progress:{/bold} ${this.formatTime(currentSeconds)} / ${this.formatTime(totalSeconds)}\n` +
+        `{bold}Views:{/bold} ${track.views}\n\n` +
+        `{bold}Uploaded:{/bold} ${track.uploaded}\n\n` +
+        `{bold}Progress:{/bold} ${formatTime(currentSeconds)} / ${formatTime(totalSeconds)}\n` +
         `\n\n[${progressBar}] ${frame}`,
     )
     if (this.trackInfoBox.hidden) this.trackInfoBox.show()
@@ -134,6 +137,7 @@ export class Logic extends Components {
     await this.mpvPlayer.writeStream(trackStream)
 
     this.updateTrackCover(track)
+    this.updateTrackInfo(track, 0)
 
     if (this.progressInterval) {
       clearInterval(this.progressInterval)
@@ -148,18 +152,6 @@ export class Logic extends Components {
 
     this.switchToMainScreen()
     this.screenRender()
-  }
-
-  formatTime(seconds: number): string {
-    if (isNaN(seconds) || seconds < 0) return '00:00'
-
-    const minutes = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-
-    const formattedMinutes = String(minutes).padStart(2, '0')
-    const formattedSeconds = String(secs).padStart(2, '0')
-
-    return `${formattedMinutes}:${formattedSeconds}`
   }
 
   async startProgressTracking(track: TVideo) {

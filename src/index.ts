@@ -1,5 +1,13 @@
-import { Handler } from './lib/handler'
+import { App } from './app'
 
-const hanlder = new Handler()
+const bootsrapp = async () => {
+  try {
+    const hanlder = new App()
 
-hanlder.init()
+    await hanlder.init()
+  } catch (error) {
+    throw error
+  }
+}
+
+bootsrapp()

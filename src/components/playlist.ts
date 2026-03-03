@@ -3,20 +3,15 @@ import { mainLayout } from './screen'
 
 const playlistBox = blessed.list({
   parent: mainLayout,
-  width: '30%',
-  height: '99%',
+  width: '70%',
+  height: '70%',
   top: 0,
-  left: 0,
+  left: '30%',
   label: ' Playlist ',
-  border: { type: 'line' },
+  border: { type: 'line', fg: 8 },
   keys: true,
   mouse: true,
   style: {
-    fg: 'white',
-    bg: 'black',
-    border: {
-      fg: 'yellow',
-    },
     selected: {
       bg: 'white',
       fg: 'black',

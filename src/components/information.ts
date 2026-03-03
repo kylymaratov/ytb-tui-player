@@ -3,56 +3,55 @@ import { mainLayout } from './screen'
 
 const trackInfoLayout = blessed.box({
   parent: mainLayout,
-  width: '70%',
-  height: '80%',
+  width: '30%',
+  height: '99%',
   top: 0,
-  left: '30%',
+  left: 0,
   label: ' {bold}Now playing{/bold} ',
-  border: { type: 'line' },
   tags: true,
-  style: {
-    border: { fg: 'green' },
-  },
-})
-
-const trackInfoBox = blessed.box({
-  parent: trackInfoLayout,
-  top: 'center',
-  left: '2%',
-  width: '55%',
-  height: '80%',
-  align: 'left',
-  valign: 'middle',
-  tags: true,
+  border: { type: 'line', fg: 8 },
 })
 
 const trackCoverBox = blessed.box({
   parent: trackInfoLayout,
-  top: 'center',
-  left: '60%',
-  width: '35%',
-  height: '70%',
+  top: 0,
+  left: 'center',
+  width: '90%',
+  height: '50%',
   align: 'center',
   valign: 'middle',
   tags: true,
   hidden: true,
 })
 
+const trackInfoBox = blessed.box({
+  parent: trackInfoLayout,
+  top: '40%',
+  left: 'center',
+  width: '90%',
+  height: '50%',
+  align: 'center',
+  valign: 'middle',
+  tags: true,
+  content: '{center}Select track and press Enter{/center}',
+})
+
 const helpBox = blessed.box({
   parent: mainLayout,
-  top: '80%',
+  top: '70%',
   left: '30%',
   width: '70%',
-  height: '20%',
+  height: '30%',
   align: 'center',
   valign: 'middle',
   tags: true,
   border: { type: 'line', fg: 8 },
   content:
-    '{bold}Управление:{/bold}\n' +
-    '↑/↓: Навигация | Enter: Воспроизвести\n' +
-    'Space: Пауза | q: Выход',
-  label: 'Instrucation',
+    '↑/↓: Navigation | Enter: Play selected track | Space: Pause/Resume | q: Exit\n\n' +
+    'Shift + S: To search screen | Shift + F: Open favorites | Shift + L: Add to favorites\n\n' +
+    'Shift + N: Next track | Shift + P: Previus track | Shift + P: Add to playlist\n\n' +
+    'Shift + D: Del from playlist or favorites | Shift + H: To hide info box',
+  label: 'Info',
 })
 
 export { trackCoverBox, trackInfoBox, trackInfoLayout, helpBox }

@@ -6,4 +6,6 @@ export interface TVideo {
   thumbnail: string
   duration: string
   durationMs?: number
+  uploaded: string
+  views: number
 }

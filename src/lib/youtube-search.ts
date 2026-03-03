@@ -3,8 +3,6 @@ import ytdl from 'ytdl-core'
 import { debug } from './debug'
 import { TVideo } from '../types/entities.types'
 
-import { Innertube, UniversalCache } from 'youtubei.js'
-
 process.env.YOUTUBEJS_NO_LOGS = 'true'
 
 export class Youtube {
@@ -30,6 +28,8 @@ export class Youtube {
         thumbnail: v.thumbnail ?? '',
         duration: v.duration.timestamp,
         durationMs: v.duration.seconds,
+        views: v.views,
+        uploaded: v.ago,
       }))
     } catch (error) {
       debug(error as Error)
