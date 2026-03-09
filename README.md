@@ -1,4 +1,5 @@
-# ytb-tui-music
+# Youtube terminal player
+
 
 A terminal-based YouTube audio player built with Node.js and [blessed](https://github.com/chjj/blessed) for a rich TUI experience. It allows searching for YouTube tracks, managing playlists and favorites, and controlling playback directly from the terminal.
 
